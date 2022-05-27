@@ -23,7 +23,7 @@ var svg = d3.select("#scatter")
 
 // Append a group to the SVG area and shift ('translate') it to the right and to the bottom
 var chartGroup = svg.append("g")
-  .attr("transform", `translate(${margin.left}, ${margin.top})`);
+  .attr("transform", `translate(${margin.left+40}, ${margin.top})`);
 
 // Load data from data.csv
 var file = "assets/data/data.csv"
@@ -40,12 +40,6 @@ function errorHandle(error) {
 // Function takes in argument statesData
 function init(statesData) {
 
-//   // Loop through the data and pass argument data
-//   statesData.map(function (data) {
-//     data.poverty = +data.poverty;
-//     data.obesity = +data.obesity;
-//   });
-  
   XValue = statesData.map(x => +x.poverty);
   YValue = statesData.map(x => +x.obesity);
   
@@ -77,11 +71,10 @@ function init(statesData) {
     .data(statesData)
     .enter()
     .append("circle")
+    .attr("class","stateCircle")
     .attr("cx", d => xLinearScale(d.poverty))
     .attr("cy", d => yLinearScale(d.obesity))
     .attr("r", "13")
-    .attr("fill", "#1f6a85")
-    .attr("opacity", ".60")
 
 
   // Append text to circles 
@@ -89,12 +82,44 @@ function init(statesData) {
     .data(statesData)
     .enter()
     .append("text")
+    .attr("class","stateText")
     .attr("x", d => xLinearScale(d.poverty))
     .attr("y", d => yLinearScale(d.obesity))
-    .style("font-size", "10px")
-    .style("text-anchor", "middle")
-    .style('fill', 'white')
     .text(d => (d.abbr));
 
+  // Create axes labels
+  chartGroup.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - margin.left-40)
+    .attr("x", 0 - (height / 2))
+    .attr("dy", "1em")
+    .attr("class", "axisText")
+    .text("Obese (%)");
+
+  chartGroup.append("text")
+    .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
+    .attr("class", "axisText")
+    .text("In Poverty (%)");
   
+  // Initialize tool tip
+  var toolTip = d3.tip()
+    .attr("class", "tooltip")
+    .offset([40, -60])
+    .html(function (d) {
+      return (`${d.state}<br>Poverty: ${d.poverty}%<br>Obesity: ${d.obesity}% `);
+    });
+
+  // Create tooltip
+  chartGroup.call(toolTip);
+
+  // Create event listeners to display and hide the tooltip
+  circlesGroup.on("mouseover", function (data) {
+    toolTip.show(data, this);
+  })
+  // onmouseout event
+  .on("mouseout", function (data) {
+    toolTip.hide(data);
+  });
+
 }
+
