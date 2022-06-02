@@ -1,12 +1,12 @@
 // svg container
 var svgWidth = 800;
-var svgHeight = 600;
+var svgHeight = 650;
 
 // margins
 var margin = {
   top: 20,
   right: 60,
-  bottom: 80,
+  bottom: 90,
   left: 20,
 };
 
