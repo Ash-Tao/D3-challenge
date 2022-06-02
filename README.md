@@ -1,82 +1,167 @@
-# Data Journalism and D3
+# Data_Journalism_and_D3
 
+## Target
+Create a web page for a major metro paper to visualise the current trends shaping people's lives analysis, including creating charts, graphs, and interactive elements to help readers understand your findings.<br/>
 
-## Background
+Sniff out the health risks facing particular demographics by sifting through information from the U.S. Census Bureau and the Behavioural Risk Factor Surveillance System.<br/>
 
-Welcome to the newsroom! You've just accepted a data visualisation position for a major metro paper. You're tasked with analysing the current trends shaping people's lives, as well as creating charts, graphs, and interactive elements to help readers understand your findings.
+The data set is based on 2014 ACS 1-year estimates<br/>
 
-The editor wants to run a series of feature stories about the health risks facing particular demographics. She's counting on you to sniff out the first story idea by sifting through information from the U.S. Census Bureau and the Behavioural Risk Factor Surveillance System.
+[**Click Here**](https://ash-tao.github.io/D3-challenge/) to find out how the web page looks like. <br/>
 
-The data set included with the assignment is based on 2014 ACS 1-year estimates: [https://factfinder.census.gov/faces/nav/jsf/pages/searchresults.xhtml](https://factfinder.census.gov/faces/nav/jsf/pages/searchresults.xhtml), but you are free to investigate a different data set. The current data set includes data on rates of income, obesity, poverty, etc. by state. MOE stands for "margin of error."
+**_Web page image_**<br/>
+![full_page](output/screen_shot_full_page.png).<br/>
 
-### Before You Begin
+## Step by Step Approch
 
-1. Create a new repository for this project called `D3-challenge`. **Do not add this homework to an existing repository**.
+### Step 1 Create a scatter plot with a tooltip fuction
 
-2. Clone the new repository to your computer.
+![tooltip](output/tooltip.gif)<br/>
 
-3. Inside your local git repository, create a directory for the D3 challenge. Use the folder name to correspond to the challenge: **D3_data_journalism**.
+* Pull in the data from `data.csv` by using the `d3.csv` function. <br/>
+  ``` python
+  d3.csv("assets/data/data.csv").then(function(data, err) {
+  
+  if (err) throw err;
+  
+  data.forEach(d => {
+    d.poverty = +d.poverty;
+    d.age = +d.age;
+    d.income = +d.income;
+    d.healthcare = +d.healthcare;
+    d.obesity = +d.obesity;
+    d.smokes = +d.smokes;
+  });
+  }
+  ```
+* Create a scatter plot that represents each state with circle elements, and include state abbreviations in the circles.<br/>
+  ``` python
+  var circlesText = circlesGroup.append("text")
+    .text(d => d.abbr)
+    .attr("dx", d => xLinearScale(d[XAxis]))
+    .attr("dy", d => yLinearScale(d[YAxis])+5)
+    .classed('stateText', true);
+  ```
+* Add a tooltip on each circle elements.<br/>
+  ``` python
+  // Initialize tool tip
+  var toolTip = d3.tip()
+    .attr("class", "tooltip")
+    .offset([40, -60])
+    .html(function (d) {
+    return (`${d.state}<br>Poverty: ${d.poverty}%<br>Obesity: ${d.obesity}% `);
+    });
+  // call tooltip
+  circlesGroup.call(toolTip);
+  // Create event listeners
+  circlesGroup.on("mouseover", function(data) {
+    toolTip.show(data,this);
+  })
+  // onmouseout event
+  .on("mouseout", function(data) {
+  toolTip.hide(data);
+  });
+  ```
+### Step 2 Create a interact scatter plot based on the aboce dataset
 
-4. This homework utilises both **html** and **Javascript** so be sure to add all the necessary files. These will be the main files to run for analysis.
+![animated-scatter](output/animated-scatter.gif)
 
-5. Push the above changes to GitHub or GitLab.
+**Main solution ideas:**<br/>
 
-## Your Task
+* Update the layout of the plot with variables.<br/>
+  ``` python
+  // x-label
+  function renderXAxes(newXScale, xAxis) {
+    var bottomAxis = d3.axisBottom(newXScale);
+    xAxis.transition()
+      .duration(1000)
+      .call(bottomAxis);
+    return xAxis;
+  }
+  // y-label
+  function renderYAxes(newYScale, yAxis) {
+    var leftAxis = d3.axisLeft(newYScale);
+    yAxis.transition()
+      .duration(1000)
+      .call(leftAxis);
+    return yAxis;
+  }
+  ```
+* Update tooltip with if statement and variable.<br/>
+  ``` python
+  function updateToolTip(XAxis, YAxis, circlesGroup) {
+  // update output text
+  var xlabel;
+  var ylabel;
+  if (XAxis === "poverty") {
+    xlabel = "Poverty:";
+  }
+  else if (XAxis === "age") {
+    xlabel = "Age:";
+  }
+  else if (XAxis === "income"){
+      xlabel = "Household income:"
+  }
+  if (YAxis === 'healthcare'){
+      ylabel = "Health:"
+  }
+  else if (YAxis === 'obesity'){
+      ylabel = "Obesity:"
+  }
+  else if (YAxis === 'smokes'){
+      ylabel = "Smokes:"
+  }
+  ```
+* Update with "active" & "inactive" and variables<br/>
+  ``` python
+  if (XAxis === "age") {
+      AgeLabel
+        .classed("active", true)
+        .classed("inactive", false);
+      PovertyLabel
+        .classed("active", false)
+        .classed("inactive", true);
+      IncomeLabel
+        .classed("active", false)
+        .classed("inactive", true);
+  }
+  else if(XAxis === 'income'){
+    IncomeLabel
+      .classed("active", true)
+      .classed("inactive", false);
+    PovertyLabel
+      .classed("active", false)
+      .classed("inactive", true);
+    AgeLabel
+      .classed("active", false)
+      .classed("inactive", true);
+  }
+  else {
+    IncomeLabel
+      .classed("active", false)
+      .classed("inactive", true);
+    AgeLabel
+      .classed("active", false)
+      .classed("inactive", true);
+    PovertyLabel
+      .classed("active", true)
+      .classed("inactive", false);
+  }
+  ```
+  
+  ## Files
+  [output](/output)<br/>
+  - animated-scatter.gif<br/>
+  - screen_shot_full_page.png<br/>
+  - tooltip.gif<br/>
 
-### Core Assignment: D3 Dabbler (Required Assignment)
+  [index.html](/index.html)<br/>
 
-![4-scatter](Images/4-scatter.jpg)
-
-You need to create a scatter plot between two of the data variables such as `Healthcare vs. Poverty` or `Smokers vs. Age`.
-
-Using the D3 techniques we taught you in class, create a scatter plot that represents each state with circle elements. You'll code this graphic in the `app.js` file of your homework directory—make sure you pull in the data from `data.csv` by using the `d3.csv` function. Your scatter plot should ultimately appear like the image at the top of this section.
-
-* Include state abbreviations in the circles.
-
-* Create and situate your axes and labels to the left and bottom of the chart.
-
-* Note: You'll need to use `python -m http.server` to run the visualisation. This will host the page at `localhost:8000` in your web browser.
-
-- - -
-
-### Bonus: Impress the Boss (Optional Assignment)
-
-Why make a static graphic when D3 lets you interact with your data?
-
-![7-animated-scatter](Images/7-animated-scatter.gif)
-
-#### 1. More Data, More Dynamics
-
-You're going to include more demographics and more risk factors. Place additional labels in your scatter plot and give them click events so that your users can decide which data to display. Animate the transitions for your circles' locations as well as the range of your axes. Do this for two risk factors for each axis. Or, for an extreme challenge, create three for each axis.
-
-* Hint: Try binding all of the CSV data to your circles. This will let you easily determine their x or y values when you click the labels.
-
-#### 2. Incorporate d3-tip
-
-While the ticks on the axes allow us to infer approximate values for each circle, it's impossible to determine the true value without adding another layer of data. Enter tooltips: developers can implement these in their D3 graphics to reveal a specific element's data when the user hovers their cursor over the element. Add tooltips to your circles and display each tooltip with the data that the user has selected. Use the `d3-tip.js` plugin developed by [Justin Palmer](https://github.com/Caged)—we've already included this plugin in your assignment directory.
-
-![8-tooltip](Images/8-tooltip.gif)
-
-* Check out [David Gotz's example](https://bl.ocks.org/davegotz/bd54b56723c154d25eedde6504d30ad7) to see how you should implement tooltips with d3-tip.
-
-- - -
-
-### Assessment
-
-Your final product will be assessed on the following metrics:
-
-* Creation of a **new** repository on GitHub called `D3-Challenge` (note the kebab-case). Do not add to an already existing repo.
-
-* Completion of all steps in the core assignment
-
-* Coherency of scatter plot (labels, ticks)
-
-* Visual attraction
-
-* Professionalism
-
-**Good luck!**
-
-### Copyright
-
-© 2021 Trilogy Education Services, LLC, a 2U, Inc. brand. Confidential and Proprietary. All Rights Reserved.
+  [assets](/assets)<br/>
+  - css<br/>
+    - d3Style.css<br/>
+    - style.css <br/>
+  - data<br/>
+    - data.csv<br/> 
+  - js<br/>
+    - app.js <br/>
